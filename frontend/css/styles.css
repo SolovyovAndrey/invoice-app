@@ -1,0 +1,256 @@
+[hidden]{display:none !important}
+
+:root{
+    --primary:#2B579A;--primary-light:#3a6bc5;
+    --secondary:#217346;--secondary-light:#2a8f56;
+    --bg:#eef1f5;--card-bg:#fff;
+    --text:#1a1a2e;--text-light:#6b7280;
+    --border:#d1d5db;--border-light:#e5e7eb;
+    --danger:#dc2626;--danger-light:#fee2e2;
+    --warning:#f59e0b;--success:#16a34a;
+    --field-bg:#f0faf0;--field-border:#a3d9a5;
+    --field-empty:#fff;--field-modified:#fffbeb;
+    --radius:8px;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+
+/* Layout */
+.app-container{max-width:1600px;margin:0 auto;padding:1rem 1.5rem}
+.app-header{text-align:center;margin-bottom:1rem}
+.app-header h1{font-size:1.5rem;color:var(--primary);font-weight:700}
+.subtitle{color:var(--text-light);font-size:.85rem}
+
+/* Tabs */
+.tab-nav{display:flex;border-bottom:2px solid var(--border);margin-bottom:1rem}
+.tab-btn{padding:.6rem 1.25rem;border:none;background:none;font-size:.9rem;font-weight:500;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab-btn:hover{color:var(--primary)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.tab-badge{background:var(--primary);color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:999px;margin-left:.25rem}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* Drop zone */
+.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;cursor:pointer;background:var(--card-bg);transition:all .2s}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:#f0f4ff}
+.drop-icon{font-size:2.5rem;margin-bottom:.5rem}
+.drop-text{font-size:1rem}.drop-hint{font-size:.8rem;color:var(--text-light);margin-top:.3rem}
+
+/* Processing */
+.processing{text-align:center;padding:2rem}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top:3px solid var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toolbar */
+.invoice-toolbar{display:flex;justify-content:space-between;align-items:center;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:.5rem 1rem;margin-bottom:.75rem;box-shadow:var(--shadow)}
+.nav-group{display:flex;align-items:center;gap:.5rem}
+.nav-label{font-size:.85rem;font-weight:600;color:var(--text-light);min-width:60px;text-align:center}
+.action-group{display:flex;align-items:center;gap:.4rem}
+
+/* Buttons */
+.btn{padding:.45rem .9rem;border:none;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.3rem}
+.btn-sm{padding:.35rem .7rem;font-size:.75rem}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-light)}
+.btn-secondary{background:var(--secondary);color:#fff}.btn-secondary:hover{background:var(--secondary-light)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-light)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b91c1c}
+
+/* ===== SPLIT PANE ===== */
+.split-pane{display:flex;gap:.75rem;min-height:calc(100vh - 200px)}
+
+.left-panel{flex:0 0 420px;overflow-y:auto;max-height:calc(100vh - 200px);padding-right:.25rem}
+.right-panel{flex:1;min-width:0}
+
+/* Custom scrollbar for left panel */
+.left-panel::-webkit-scrollbar{width:5px}
+.left-panel::-webkit-scrollbar-track{background:transparent}
+.left-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.left-panel::-webkit-scrollbar-thumb:hover{background:var(--text-light)}
+
+/* Section cards */
+.section-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.6rem;box-shadow:var(--shadow);overflow:hidden}
+
+/* Section headers with icons */
+.section-header{
+    background:linear-gradient(135deg,#f8f9fa,#eef1f5);
+    padding:.5rem .75rem;
+    font-size:.8rem;
+    font-weight:700;
+    color:var(--primary);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+}
+
+/* Color-coded section headers */
+.section-card:nth-child(1) .section-header{color:#6b7280}                          /* Classification */
+.section-card:nth-child(2) .section-header{color:var(--primary)}                   /* Creditor */
+.section-card:nth-child(3) .section-header{color:#7c3aed}                          /* Recipient */
+.section-card:nth-child(4) .section-header{color:#0d9488}                          /* Invoice Details */
+.section-card:nth-child(5) .section-header{color:var(--secondary)}                 /* Amounts */
+
+/* Subtle left border accent per section */
+.section-card:nth-child(2){border-left:3px solid var(--primary)}
+.section-card:nth-child(3){border-left:3px solid #7c3aed}
+.section-card:nth-child(4){border-left:3px solid #0d9488}
+.section-card:nth-child(5){border-left:3px solid var(--secondary)}
+
+/* Info rows */
+.info-row{display:flex;align-items:center;padding:.35rem .75rem;gap:.4rem;flex-wrap:wrap;font-size:.8rem}
+.info-label{color:var(--text-light);font-weight:500}
+.source-tag{display:inline-block;padding:.1rem .45rem;border-radius:4px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.source-tag.qr{background:#d1fae5;color:#065f46}
+.source-tag.ocr{background:#dbeafe;color:#1e40af}
+.source-tag.manual{background:#fef3c7;color:#92400e}
+.conf-tag{font-weight:700;font-size:.8rem}
+.conf-tag.high{color:var(--success)}.conf-tag.mid{color:var(--warning)}.conf-tag.low{color:var(--danger)}
+.file-tag{color:var(--text);font-size:.8rem;word-break:break-all}
+
+/* Form rows - SAP style */
+.form-table{padding:.25rem 0}
+.form-row{display:flex;align-items:center;padding:.2rem .75rem;border-bottom:1px solid var(--border-light)}
+.form-row:last-child{border-bottom:none}
+.form-row label{flex:0 0 140px;font-size:.8rem;font-weight:500;color:var(--text-light);padding-right:.5rem}
+.form-row input{flex:1;padding:.35rem .5rem;border:1px solid var(--field-border);border-radius:4px;font-size:.85rem;background:var(--field-bg);transition:all .15s;font-family:inherit}
+.form-row input:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 2px rgba(43,87,154,.15)}
+.form-row input.empty{background:var(--field-empty);border-color:var(--border)}
+.form-row input.modified{background:var(--field-modified);border-color:var(--warning)}
+.form-row .short-input{max-width:100px}
+.form-row .amount-input{text-align:right;font-family:Consolas,"Courier New",monospace;font-weight:500}
+.total-row{background:#f0f7ff;border-bottom:none;padding:.35rem .75rem}
+.total-row label{font-weight:700;color:var(--primary)}
+.total-row input{font-weight:700;font-size:.9rem;border-width:2px}
+
+/* Recipient section accent */
+#recipientFields .form-row input{
+    border-color:#c4b5fd;
+    background:#faf5ff;
+}
+#recipientFields .form-row input:focus{
+    border-color:#7c3aed;
+    background:#fff;
+    box-shadow:0 0 0 2px rgba(124,58,237,.15);
+}
+#recipientFields .form-row input.empty{
+    background:var(--field-empty);
+    border-color:var(--border);
+}
+
+/* ===== DOCUMENT VIEWER ===== */
+.document-viewer{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);height:100%;min-height:calc(100vh - 200px);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.document-viewer iframe,.document-viewer embed{width:100%;height:100%;border:none;position:absolute;top:0;left:0}
+.document-viewer img{max-width:100%;max-height:100%;object-fit:contain}
+.viewer-empty{color:var(--text-light);font-size:.9rem;text-align:center;padding:2rem}
+
+/* ===== HISTORY TAB ===== */
+.history-toolbar{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.75rem}
+.search-box input{width:100%;padding:.55rem .85rem;border:1px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--card-bg)}
+.search-box input:focus{outline:none;border-color:var(--primary)}
+.filter-group{display:flex;flex-wrap:wrap;gap:.4rem}
+.filter-group input,.filter-group select{padding:.35rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.8rem;background:var(--card-bg);min-width:100px}
+.bulk-actions{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius);margin-bottom:.6rem;font-size:.8rem}
+
+.history-table-wrapper{overflow-x:auto;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.history-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.history-table thead{background:var(--bg);border-bottom:2px solid var(--border)}
+.history-table th{padding:.55rem .6rem;text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;color:var(--text-light);white-space:nowrap}
+.history-table th.sortable{cursor:pointer}.history-table th.sortable:hover{color:var(--primary)}
+.history-table td{padding:.45rem .6rem;border-bottom:1px solid var(--border-light);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.history-table tbody tr:hover{background:#f8fafc}
+.history-table .col-check{width:32px;text-align:center}
+.history-table .amount-cell{font-family:Consolas,monospace;text-align:right}
+.history-table .actions-cell{display:flex;gap:.25rem}
+
+/* Vendor & Recipient columns — show tooltip on hover */
+.history-table td[title]:hover{
+    overflow:visible;
+    position:relative;
+    z-index:10;
+}
+.history-table td[title]{
+    cursor:default;
+}
+
+.icon-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:.2rem .4rem;cursor:pointer;font-size:.75rem;transition:all .15s}
+.icon-btn:hover{border-color:var(--primary);background:#f0f4ff}
+.icon-btn.danger:hover{border-color:var(--danger);background:var(--danger-light)}
+
+.pagination{display:flex;justify-content:center;align-items:center;gap:.25rem;margin-top:.75rem}
+.page-btn{padding:.3rem .6rem;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);cursor:pointer;font-size:.8rem}
+.page-btn:hover{border-color:var(--primary);color:var(--primary)}
+.page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.page-btn:disabled{opacity:.4;cursor:default}
+.no-results{text-align:center;padding:2.5rem;color:var(--text-light)}
+
+/* Source badges in table */
+.src-badge{font-size:.6rem;padding:.1rem .35rem;border-radius:3px;font-weight:600;text-transform:uppercase}
+.src-qr{background:#d1fae5;color:#065f46}
+.src-ocr{background:#dbeafe;color:#1e40af}
+.src-manual{background:#fef3c7;color:#92400e}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal{background:var(--card-bg);border-radius:10px;width:92%;max-width:650px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:1rem}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-light);line-height:1}
+.modal-body{padding:1rem 1.25rem}
+.modal-body .form-row{display:flex;align-items:center;padding:.25rem 0;border-bottom:1px solid var(--border-light)}
+.modal-body .form-row:last-child{border-bottom:none}
+.modal-body .form-row label{flex:0 0 130px;font-size:.8rem;font-weight:500;color:var(--text-light)}
+.modal-body .form-row input{flex:1;padding:.35rem .5rem;border:1px solid var(--border);border-radius:4px;font-size:.85rem}
+.modal-body .form-row input:focus{outline:none;border-color:var(--primary)}
+.modal-footer{display:flex;justify-content:flex-end;gap:.5rem;padding:.75rem 1.25rem;border-top:1px solid var(--border);background:var(--bg);border-radius:0 0 10px 10px}
+
+/* Modal section headers (for grouped edit modal) */
+.modal-section-header{
+    font-size:.75rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#fff;
+    padding:.4rem .75rem;
+    margin-top:.75rem;
+    border-radius:4px;
+}
+.modal-section-header:first-child{margin-top:0}
+
+/* Color-coded modal sections */
+.modal-section-header:nth-of-type(1){background:var(--primary)}             /* Creditor */
+.modal-section-header:nth-of-type(2){background:#7c3aed}                    /* Recipient */
+.modal-section-header:nth-of-type(3){background:#0d9488}                    /* Invoice Details */
+.modal-section-header:nth-of-type(4){background:var(--secondary)}           /* Amounts */
+
+/* Banners */
+.error-banner,.success-banner{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:.6rem 1.25rem;border-radius:8px;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:300;font-size:.85rem;max-width:90vw}
+.error-banner{background:#fef2f2;border:1px solid #fecaca;color:var(--danger)}
+.success-banner{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.error-banner button,.success-banner button{background:none;border:none;cursor:pointer;font-size:1.1rem;margin-left:.3rem;line-height:1}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1200px){
+    .left-panel{flex:0 0 380px}
+}
+@media(max-width:1024px){
+    .split-pane{flex-direction:column}
+    .left-panel{flex:none;max-height:none;overflow:visible}
+    .right-panel{min-height:500px}
+    .document-viewer{min-height:500px}
+}
+@media(max-width:768px){
+    .app-container{padding:.75rem}
+    .form-row label{flex:0 0 100px;font-size:.75rem}
+    .filter-group{flex-direction:column}
+    .invoice-toolbar{flex-direction:column;gap:.5rem}
+    .history-table td{max-width:120px}
+    .modal{width:96%;max-width:none}
+}
+@media(max-width:480px){
+    .form-row{flex-direction:column;align-items:stretch;gap:.15rem}
+    .form-row label{flex:none}
+    .action-group{flex-wrap:wrap}
+}

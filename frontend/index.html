@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlpineDocs</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1>AlpineDocs</h1>
+        <p class="subtitle">OCR &amp; QR-bill reader for Swiss invoices</p>
+    </header>
+
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="upload" onclick="switchTab('upload')">Upload &amp; Process</button>
+        <button class="tab-btn" data-tab="history" onclick="switchTab('history')">
+            History <span class="tab-badge" id="historyBadge" hidden>0</span>
+        </button>
+    </nav>
+
+    <!-- ============ UPLOAD TAB ============ -->
+    <div class="tab-content active" id="tab-upload">
+
+        <div class="drop-zone" id="dropZone" tabindex="0">
+            <div class="drop-zone-content">
+                <div class="drop-icon">&#128196;</div>
+                <p class="drop-text">Drop invoices here or <strong>click to browse</strong></p>
+                <p class="drop-hint">PDF, PNG, JPG, TIFF &mdash; max 20 MB &mdash; up to 50 files</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg,.tiff" hidden>
+        </div>
+
+        <div class="processing" id="processing" hidden>
+            <div class="spinner"></div>
+            <p id="processingText">Processing invoices...</p>
+        </div>
+
+        <!-- Invoice toolbar -->
+        <div class="invoice-toolbar" id="invoiceToolbar" hidden>
+            <div class="nav-group">
+                <button class="btn btn-outline btn-sm" id="btnPrev" onclick="prevInvoice()">&larr; Prev</button>
+                <span class="nav-label" id="navLabel">1 / 1</span>
+                <button class="btn btn-outline btn-sm" id="btnNext" onclick="nextInvoice()">Next &rarr;</button>
+            </div>
+            <div class="action-group">
+                <button class="btn btn-primary btn-sm" onclick="saveCurrentInvoice()">&#128190; Save</button>
+                <button class="btn btn-secondary btn-sm" onclick="exportCurrent('csv')">CSV</button>
+                <button class="btn btn-secondary btn-sm" onclick="exportCurrent('excel')">Excel</button>
+                <button class="btn btn-outline btn-sm" onclick="clearAll()">Clear All</button>
+            </div>
+        </div>
+
+        <!-- Split pane -->
+        <div class="split-pane" id="splitPane" hidden>
+
+            <!-- LEFT: Fields -->
+            <div class="left-panel" id="leftPanel">
+
+                <div class="section-card">
+                    <div class="section-header">Classification</div>
+                    <div class="info-row">
+                        <span class="info-label">Source:</span>
+                        <span class="source-tag" id="srcTag">OCR</span>
+                        <span class="info-label" style="margin-left:1rem">Confidence:</span>
+                        <span class="conf-tag" id="confTag">0%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File:</span>
+                        <span class="file-tag" id="fileTag">-</span>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">Creditor (Seller)</div>
+                    <div class="form-table" id="creditorFields">
+                        <div class="form-row"><label>Name</label><input type="text" data-field="vendor_name"></div>
+                        <div class="form-row"><label>Address</label><input type="text" data-field="vendor_address"></div>
+                        <div class="form-row"><label>Tax ID / VAT UID</label><input type="text" data-field="vendor_vat_uid"></div>
+                        <div class="form-row"><label>IBAN</label><input type="text" data-field="vendor_iban"></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">Recipient (Buyer)</div>
+                    <div class="form-table" id="recipientFields">
+                        <div class="form-row"><label>Name</label><input type="text" data-field="recipient_name"></div>
+                        <div class="form-row"><label>Address</label><input type="text" data-field="recipient_address"></div>
+                        <div class="form-row"><label>Tax ID / VAT ID</label><input type="text" data-field="recipient_vat_uid"></div>
+                        <div class="form-row"><label>Company Code</label><input type="text" data-field="recipient_company_code"></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">Invoice Details</div>
+                    <div class="form-table" id="detailFields">
+                        <div class="form-row"><label>Invoice No.</label><input type="text" data-field="invoice_number"></div>
+                        <div class="form-row"><label>Invoice Date</label><input type="text" data-field="invoice_date"></div>
+                        <div class="form-row"><label>QR Reference</label><input type="text" data-field="reference_number"></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">Amounts</div>
+                    <div class="form-table" id="amountFields">
+                        <div class="form-row"><label>Currency</label><input type="text" data-field="currency" class="short-input"></div>
+                        <div class="form-row"><label>Subtotal</label><input type="text" data-field="subtotal" class="amount-input"></div>
+                        <div class="form-row"><label>VAT %</label><input type="text" data-field="vat_rate" class="short-input"></div>
+                        <div class="form-row"><label>VAT Amount</label><input type="text" data-field="vat_amount" class="amount-input"></div>
+                        <div class="form-row total-row"><label>Total</label><input type="text" data-field="total" class="amount-input"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Document preview -->
+            <div class="right-panel" id="rightPanel">
+                <div class="document-viewer" id="docViewer">
+                    <p class="viewer-empty">Document preview</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============ HISTORY TAB ============ -->
+    <div class="tab-content" id="tab-history">
+        <div class="history-toolbar">
+            <div class="search-box">
+                <input type="text" id="historySearch" placeholder="Search vendor, recipient, invoice nr, file..." oninput="debounceSearch()">
+            </div>
+            <div class="filter-group">
+                <input type="text" id="filterDateFrom" placeholder="From (DD.MM.YYYY)">
+                <input type="text" id="filterDateTo" placeholder="To (DD.MM.YYYY)">
+                <input type="number" id="filterAmountMin" placeholder="Min" step="0.01">
+                <input type="number" id="filterAmountMax" placeholder="Max" step="0.01">
+                <select id="filterCurrency"><option value="">All</option><option value="CHF">CHF</option><option value="EUR">EUR</option></select>
+                <select id="filterSource"><option value="">All</option><option value="qr_bill">QR</option><option value="ocr">OCR</option><option value="manual">Manual</option></select>
+                <button class="btn btn-outline btn-sm" onclick="resetFilters()">Reset</button>
+            </div>
+        </div>
+        <div class="bulk-actions" id="bulkActions" hidden>
+            <span id="selectedCount">0 selected</span>
+            <button class="btn btn-primary btn-sm" onclick="exportSelected('csv')">CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportSelected('excel')">Excel</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSelected()">Delete</button>
+            <button class="btn btn-outline btn-sm" onclick="clearSelection()">Deselect</button>
+        </div>
+        <div class="history-table-wrapper">
+            <table class="history-table" id="historyTable">
+                <thead><tr>
+                    <th class="col-check"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                    <th class="sortable" onclick="sortHistory('invoice_date')">Date</th>
+                    <th class="sortable" onclick="sortHistory('vendor_name')">Vendor</th>
+                    <th class="sortable" onclick="sortHistory('recipient_name')">Recipient</th>
+                    <th class="sortable" onclick="sortHistory('invoice_number')">Invoice Nr</th>
+                    <th>Cur</th>
+                    <th class="sortable" onclick="sortHistory('total')">Total</th>
+                    <th>VAT</th>
+                    <th>Source</th>
+                    <th class="sortable" onclick="sortHistory('confidence_score')">Conf</th>
+                    <th>Actions</th>
+                </tr></thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+        <div class="no-results" id="noResults" hidden><p>No invoices found.</p></div>
+    </div>
+
+    <!-- ============ EDIT MODAL ============ -->
+    <div class="modal-overlay" id="editModal" hidden>
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Edit Invoice</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveModal()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-banner" id="errorBanner" hidden>
+        <span id="errorText"></span>
+        <button onclick="hideError()">&times;</button>
+    </div>
+    <div class="success-banner" id="successBanner" hidden>
+        <span id="successText"></span>
+    </div>
+</div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
