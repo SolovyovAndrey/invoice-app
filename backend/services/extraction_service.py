@@ -1,6 +1,8 @@
 import re
 from typing import Optional, Tuple, List
 
+from cv2 import line
+
 from backend.models.invoice import InvoiceData, SourceType
 from backend.utils.regex_patterns import (
     DATE_PATTERNS, DATE_KEYWORDS,
@@ -90,10 +92,9 @@ class ExtractionService:
 
         # Recipient (buyer)
         recipient = self._extract_recipient_block(raw_text, vendor_name)
-        invoice.recipient_name = recipient.get("name")
-        invoice.recipient_address = recipient.get("address")
-        invoice.recipient_vat_uid = recipient.get("vat_uid")
-        invoice.recipient_company_code = self._extract_company_code(raw_text)
+        invoice.debtor_name = recipient.get("name")
+        invoice.debtor_address = recipient.get("address")
+        invoice.debtor_vat_uid = recipient.get("vat_uid")
 
         invoice.confidence_score = self._calculate_confidence(invoice)
 
@@ -101,7 +102,7 @@ class ExtractionService:
             "Extracted: vendor=%s | vendor_addr=%s | recipient=%s | "
             "recipient_addr=%s | invoice_no=%s | total=%s | date=%s",
             invoice.vendor_name, invoice.vendor_address,
-            invoice.recipient_name, invoice.recipient_address,
+            invoice.debtor_name, invoice.debtor_address,
             invoice.invoice_number, invoice.total, invoice.invoice_date,
         )
         return invoice
@@ -483,8 +484,16 @@ class ExtractionService:
     # ================================================================ #
 
     def _extract_invoice_number(self, text):
+        for line in text.split('\n'):
+            if 'Affaire' in line or 'affaire' in line:
+                print(f"DEBUG Affaire line: {repr(line)}")
+        
+        print("DEBUG: Extracting invoice number...")
         for lang, kw_list in INVOICE_NUMBER_KEYWORDS.items():
             for kw in kw_list:
+                print(INVOICE_NUMBER_VALUE)
+                if 'Affaire' in text or 'affaire' in text:
+                    print(f"DEBUG Affaire line: {repr(text)}")
                 pattern = kw + INVOICE_NUMBER_VALUE
                 match = re.search(pattern, text, re.IGNORECASE)
                 if match:
@@ -599,7 +608,7 @@ class ExtractionService:
         important = [
             invoice.currency, invoice.vendor_iban, invoice.vat_rate,
             invoice.invoice_number, invoice.vendor_address,
-            invoice.recipient_name,
+            invoice.debtor_name, invoice.debtor_address
         ]
         critical_found = sum(1 for f in critical if f is not None)
         important_found = sum(1 for f in important if f is not None)

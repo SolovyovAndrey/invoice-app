@@ -1,3 +1,5 @@
+# backend/services/history_service.py
+
 import math
 from datetime import datetime, timezone
 from typing import Optional, List
@@ -10,52 +12,82 @@ from backend.models.invoice import (
 
 
 class HistoryService:
+
     @staticmethod
     def _to_pydantic(record: InvoiceRecord) -> InvoiceData:
         return InvoiceData(
+            # Database
             id=record.id,
             file_name=record.file_name,
             file_hash=record.file_hash,
+            created_at=record.created_at.isoformat() if record.created_at else None,
+            updated_at=record.updated_at.isoformat() if record.updated_at else None,
+            # Source
             source_type=record.source_type,
             confidence_score=record.confidence_score or 0.0,
+            # Creditor
             vendor_name=record.vendor_name,
             vendor_address=record.vendor_address,
             vendor_iban=record.vendor_iban,
             vendor_vat_uid=record.vendor_vat_uid,
+            # Debtor  ← NEW
+            debtor_name=record.debtor_name,
+            debtor_address=record.debtor_address,
+            # Invoice details
             invoice_number=record.invoice_number,
-            invoice_date=record.invoice_date,
+            invoice_date=record.invoice_date,                       # ← NEW
+            client_number=record.client_number,                           # ← NEW
+            # Amounts
             currency=record.currency or "CHF",
             subtotal=record.subtotal,
             vat_rate=record.vat_rate,
             vat_amount=record.vat_amount,
             total=record.total,
+            # Reference
             reference_number=record.reference_number,
+            creditor_reference=record.creditor_reference,   # ← NEW
+            # Raw
             raw_text=record.raw_text,
-            created_at=record.created_at.isoformat() if record.created_at else None,
-            updated_at=record.updated_at.isoformat() if record.updated_at else None,
         )
 
     @staticmethod
     def _to_record(invoice: InvoiceData) -> InvoiceRecord:
         return InvoiceRecord(
+            # Meta
             file_name=invoice.file_name,
             file_hash=invoice.file_hash,
-            source_type=invoice.source_type.value if hasattr(invoice.source_type, "value") else str(invoice.source_type),
+            source_type=(
+                invoice.source_type.value
+                if hasattr(invoice.source_type, "value")
+                else str(invoice.source_type)
+            ),
             confidence_score=invoice.confidence_score,
+            # Creditor
             vendor_name=invoice.vendor_name,
             vendor_address=invoice.vendor_address,
             vendor_iban=invoice.vendor_iban,
             vendor_vat_uid=invoice.vendor_vat_uid,
+            # Debtor  ← NEW
+            debtor_name=invoice.debtor_name,
+            debtor_address=invoice.debtor_address,
+            # Invoice details
             invoice_number=invoice.invoice_number,
-            invoice_date=invoice.invoice_date,
+            invoice_date=invoice.invoice_date,                     # ← NEW
+            client_number=invoice.client_number,                          # ← NEW
+            # Amounts
             currency=invoice.currency,
             subtotal=invoice.subtotal,
             vat_rate=invoice.vat_rate,
             vat_amount=invoice.vat_amount,
             total=invoice.total,
+            # Reference
             reference_number=invoice.reference_number,
+            creditor_reference=invoice.creditor_reference,  # ← NEW
+            # Raw
             raw_text=invoice.raw_text,
         )
+
+    # ── Everything below is UNCHANGED ─────────────────────────────────────
 
     def save_invoice(self, db: Session, invoice: InvoiceData) -> InvoiceData:
         record = self._to_record(invoice)
@@ -89,6 +121,8 @@ class HistoryService:
                 InvoiceRecord.invoice_number.ilike(term),
                 InvoiceRecord.file_name.ilike(term),
                 InvoiceRecord.vendor_iban.ilike(term),
+                InvoiceRecord.debtor_name.ilike(term),      # ← NEW: search debtor too
+                InvoiceRecord.client_number.ilike(term),     # ← NEW
             ))
         if query.date_from:
             q = q.filter(InvoiceRecord.invoice_date >= query.date_from)
@@ -117,13 +151,26 @@ class HistoryService:
             total_pages=total_pages,
         )
 
+    # In HistoryService class — replace check_duplicate
+
     def check_duplicate(self, db: Session, file_hash: str) -> Optional[InvoiceData]:
+        """Check for duplicate file_hash — includes soft-deleted records."""
         record = (
             db.query(InvoiceRecord)
-            .filter(InvoiceRecord.file_hash == file_hash, InvoiceRecord.is_deleted == "N")
-            .first()
+            .filter(InvoiceRecord.file_hash == file_hash)
+            .first()  # ← removed is_deleted filter
         )
-        return self._to_pydantic(record) if record else None
+        if not record:
+            return None
+
+        # If soft-deleted, reactivate it
+        if record.is_deleted == "Y":
+            record.is_deleted = "N"
+            record.updated_at = datetime.now(timezone.utc)
+            db.commit()
+            db.refresh(record)
+
+        return self._to_pydantic(record)
 
     def update_invoice(self, db: Session, invoice_id: str, updates: InvoiceUpdate) -> Optional[InvoiceData]:
         record = (
@@ -178,6 +225,7 @@ class HistoryService:
             func.coalesce(func.avg(InvoiceRecord.confidence_score), 0)).scalar()
         qr_count = active.filter(InvoiceRecord.source_type == "qr_bill").count()
         ocr_count = active.filter(InvoiceRecord.source_type == "ocr").count()
+        hybrid_count = active.filter(InvoiceRecord.source_type == "hybrid").count()  # ← NEW
         now = datetime.now(timezone.utc)
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         this_month = active.filter(InvoiceRecord.created_at >= month_start).count()
@@ -205,6 +253,7 @@ class HistoryService:
             avg_confidence=round(float(avg_conf), 1),
             qr_bill_count=qr_count,
             ocr_count=ocr_count,
+            hybrid_count=hybrid_count,                      # ← NEW
             this_month_count=this_month,
             top_vendors=top_vendors,
         )

@@ -18,14 +18,13 @@ var MODAL_FIELDS = [
     ["vendor_address","Creditor Address"],
     ["vendor_iban","IBAN"],
     ["vendor_vat_uid","Creditor VAT UID"],
-    // Recipient
-    ["recipient_name","Recipient Name"],
-    ["recipient_address","Recipient Address"],
-    ["recipient_vat_uid","Recipient VAT ID"],
-    ["recipient_company_code","Company Code"],
+    // Recipient — use debtor_ (matches backend)
+    ["debtor_name","Recipient Name"],
+    ["debtor_address","Recipient Address"],
     // Details
     ["invoice_number","Invoice No."],
     ["invoice_date","Invoice Date"],
+    ["client_number","Client No."],
     ["reference_number","QR Reference"],
     // Amounts
     ["currency","Currency"],
@@ -133,8 +132,8 @@ function populateFields(data){
     // Classification
     var src = data.source_type||"ocr";
     var tag = $("srcTag");
-    tag.textContent = src==="qr_bill"?"QR-Bill":src==="manual"?"Manual":"OCR";
-    tag.className = "source-tag " + (src==="qr_bill"?"qr":src==="manual"?"manual":"ocr");
+    tag.textContent = src==="qr_bill"?"QR-Bill":src==="hybrid"?"Hybrid":src==="manual"?"Manual":"OCR";
+    tag.className = "source-tag " + (src==="qr_bill"?"qr":src==="hybrid"?"hybrid":src==="manual"?"manual":"ocr");
 
     var conf = data.confidence_score||0;
     var ct = $("confTag");
@@ -277,13 +276,14 @@ function renderHistoryTable(list){
         var tr=document.createElement("tr");
         var conf=inv.confidence_score||0;
         var cc=conf>=70?"high":conf>=40?"mid":"low";
-        var sc=inv.source_type==="qr_bill"?"src-qr":inv.source_type==="manual"?"src-manual":"src-ocr";
-        var sl=inv.source_type==="qr_bill"?"QR":inv.source_type==="manual"?"Edit":"OCR";
+        var src=inv.source_type||"ocr";
+        var sc=src==="qr_bill"?"src-qr":src==="hybrid"?"src-hybrid":src==="manual"?"src-manual":"src-ocr";
+        var sl=src==="qr_bill"?"QR":src==="hybrid"?"Hybrid":src==="manual"?"Edit":"OCR";
         tr.innerHTML=
-            '<td class="col-check"><input type="checkbox" value="'+inv.id+'"'+(selectedIds.has(inv.id)?' checked':'')+' onchange="toggleSelect(\''+inv.id+'\',this.checked)"></td>'+
+            '<td class="col-check"><input type="checkbox" value="'+inv.id+'"'+(selectedIds.has(String(inv.id))?' checked':'')+' onchange="toggleSelect(\''+inv.id+'\',this.checked)"></td>'+
             '<td>'+esc(inv.invoice_date||"-")+'</td>'+
             '<td title="'+esc(inv.vendor_address||"")+'">'+esc(inv.vendor_name||"-")+'</td>'+
-            '<td title="'+esc(inv.recipient_address||"")+'">'+esc(inv.recipient_name||"-")+'</td>'+
+            '<td title="'+esc(inv.debtor_address||"")+'">'+esc(inv.debtor_name||"-")+'</td>'+
             '<td>'+esc(inv.invoice_number||"-")+'</td>'+
             '<td>'+esc(inv.currency||"CHF")+'</td>'+
             '<td class="amount-cell">'+(inv.total!=null?fmtAmt(inv.total):"-")+'</td>'+
@@ -324,7 +324,7 @@ function resetFilters(){
 }
 
 // --- Selection ---
-function toggleSelect(id,ch){if(ch)selectedIds.add(id);else selectedIds.delete(id);updBulk()}
+function toggleSelect(id,ch){if(ch)selectedIds.add(String(id));else selectedIds.delete(String(id));updBulk()}
 function toggleSelectAll(){var ch=$("selectAll").checked;$("historyBody").querySelectorAll("input[type=checkbox]").forEach(function(c){c.checked=ch;if(ch)selectedIds.add(c.value);else selectedIds.delete(c.value)});updBulk()}
 function clearSelection(){selectedIds.clear();$("selectAll").checked=false;$("historyBody").querySelectorAll("input[type=checkbox]").forEach(function(c){c.checked=false});updBulk()}
 function updBulk(){$("bulkActions").hidden=selectedIds.size===0;$("selectedCount").textContent=selectedIds.size+" selected"}
@@ -347,15 +347,14 @@ async function openEdit(id){
         $("modalTitle").textContent="Edit - "+(inv.file_name||"Invoice");
         var body=$("modalBody");body.innerHTML="";
 
-        // Group fields with section headers
         var sections = [
-            { title: "Creditor (Seller)", fields: [
+            { title: "Recipient (Buyer)", color: "#7c3aed", fields: [
+                ["debtor_name","Name"],["debtor_address","Address"],
+                ["debtor_vat_uid","VAT ID"],["debtor_company_code","Company Code"]
+            ]},
+            { title: "Creditor (Seller)", color: "#0d9488", fields: [
                 ["vendor_name","Name"],["vendor_address","Address"],
                 ["vendor_vat_uid","VAT UID"],["vendor_iban","IBAN"]
-            ]},
-            { title: "Recipient (Buyer)", fields: [
-                ["recipient_name","Name"],["recipient_address","Address"],
-                ["recipient_vat_uid","VAT ID"],["recipient_company_code","Company Code"]
             ]},
             { title: "Invoice Details", fields: [
                 ["invoice_number","Invoice No."],["invoice_date","Invoice Date"],

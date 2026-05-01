@@ -73,22 +73,21 @@
                 </div>
 
                 <div class="section-card">
+                    <div class="section-header">Recipient (Buyer)</div>
+                    <div class="form-table" id="recipientFields">
+                        <div class="form-row"><label>Name</label><input type="text" data-field="debtor_name"></div>
+                        <div class="form-row"><label>Address</label><input type="text" data-field="debtor_address"></div>
+                        <div class="form-row"><label>Tax ID / VAT ID</label><input type="text" data-field="debtor_vat_uid"></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
                     <div class="section-header">Creditor (Seller)</div>
                     <div class="form-table" id="creditorFields">
                         <div class="form-row"><label>Name</label><input type="text" data-field="vendor_name"></div>
                         <div class="form-row"><label>Address</label><input type="text" data-field="vendor_address"></div>
                         <div class="form-row"><label>Tax ID / VAT UID</label><input type="text" data-field="vendor_vat_uid"></div>
                         <div class="form-row"><label>IBAN</label><input type="text" data-field="vendor_iban"></div>
-                    </div>
-                </div>
-
-                <div class="section-card">
-                    <div class="section-header">Recipient (Buyer)</div>
-                    <div class="form-table" id="recipientFields">
-                        <div class="form-row"><label>Name</label><input type="text" data-field="recipient_name"></div>
-                        <div class="form-row"><label>Address</label><input type="text" data-field="recipient_address"></div>
-                        <div class="form-row"><label>Tax ID / VAT ID</label><input type="text" data-field="recipient_vat_uid"></div>
-                        <div class="form-row"><label>Company Code</label><input type="text" data-field="recipient_company_code"></div>
                     </div>
                 </div>
 
@@ -153,7 +152,7 @@
                     <th class="col-check"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
                     <th class="sortable" onclick="sortHistory('invoice_date')">Date</th>
                     <th class="sortable" onclick="sortHistory('vendor_name')">Vendor</th>
-                    <th class="sortable" onclick="sortHistory('recipient_name')">Recipient</th>
+                    <th class="sortable" onclick="sortHistory('debtor_name')">Recipient</th>
                     <th class="sortable" onclick="sortHistory('invoice_number')">Invoice Nr</th>
                     <th>Cur</th>
                     <th class="sortable" onclick="sortHistory('total')">Total</th>

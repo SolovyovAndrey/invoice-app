@@ -220,7 +220,7 @@ body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;b
 .modal-section-header:first-child{margin-top:0}
 
 /* Color-coded modal sections */
-.modal-section-header:nth-of-type(1){background:var(--primary)}             /* Creditor */
+.modal-section-header:nth-of-type(1){background:#7c3aed}             /* Creditor */
 .modal-section-header:nth-of-type(2){background:#7c3aed}                    /* Recipient */
 .modal-section-header:nth-of-type(3){background:#0d9488}                    /* Invoice Details */
 .modal-section-header:nth-of-type(4){background:var(--secondary)}           /* Amounts */

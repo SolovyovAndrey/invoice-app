@@ -1,59 +1,100 @@
-from pydantic import BaseModel, Field
+# backend/models/invoice.py
+
+from dataclasses import dataclass, field
 from typing import Optional, List
 from enum import Enum
+from pydantic import BaseModel
 
+
+# ── Enums ─────────────────────────────────────────────────────────────────────
 
 class SourceType(str, Enum):
     QR_BILL = "qr_bill"
     OCR = "ocr"
+    HYBRID = "hybrid"
     MANUAL = "manual"
 
 
-class InvoiceData(BaseModel):
-    id: Optional[str] = None
+# ── Core data class ───────────────────────────────────────────────────────────
+
+@dataclass
+class InvoiceData:
+    # Database / identity
+    id: Optional[int] = None
     file_name: str = ""
     file_hash: Optional[str] = None
-    source_type: SourceType = SourceType.OCR
-    confidence_score: float = Field(default=0.0, ge=0.0, le=100.0)
+    status: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
-    # Vendor (seller)
+    # Source
+    source_type: SourceType = SourceType.OCR
+    confidence_score: float = 0.0
+
+    # Creditor (vendor)
     vendor_name: Optional[str] = None
     vendor_address: Optional[str] = None
     vendor_iban: Optional[str] = None
     vendor_vat_uid: Optional[str] = None
 
-    # Recipient (buyer)
-    recipient_name: Optional[str] = None
-    recipient_address: Optional[str] = None
-    recipient_vat_uid: Optional[str] = None
-    recipient_company_code: Optional[str] = None
+    # Debtor (recipient)
+    debtor_name: Optional[str] = None
+    debtor_address: Optional[str] = None
 
     # Invoice details
     invoice_number: Optional[str] = None
     invoice_date: Optional[str] = None
+    client_number: Optional[str] = None
+
+    # Amounts
     currency: str = "CHF"
     subtotal: Optional[float] = None
     vat_rate: Optional[float] = None
     vat_amount: Optional[float] = None
     total: Optional[float] = None
-    reference_number: Optional[str] = None
-    raw_text: Optional[str] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
 
+    # Reference
+    reference_number: Optional[str] = None
+    creditor_reference: Optional[str] = None
+
+    # Raw
+    raw_text: Optional[str] = None
+
+
+# ── Pydantic models for API ───────────────────────────────────────────────────
 
 class InvoiceBatch(BaseModel):
-    invoices: List[InvoiceData] = []
+    """Response model for batch upload."""
+    invoices: list = []
     total_processed: int = 0
     total_errors: int = 0
     errors: List[str] = []
 
 
+class InvoiceUpdate(BaseModel):
+    vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    vendor_iban: Optional[str] = None
+    vendor_vat_uid: Optional[str] = None
+    debtor_name: Optional[str] = None
+    debtor_address: Optional[str] = None
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[str] = None
+    client_number: Optional[str] = None
+    currency: Optional[str] = None
+    subtotal: Optional[float] = None
+    vat_rate: Optional[float] = None
+    vat_amount: Optional[float] = None
+    total: Optional[float] = None
+    reference_number: Optional[str] = None
+    creditor_reference: Optional[str] = None
+
+
 class ExportRequest(BaseModel):
-    invoices: List[InvoiceData] = []
+    """Request model for export operations."""
     invoice_ids: List[str] = []
+    invoices: List[dict] = []
     format: str = "csv"
-    include_raw_text: bool = False
 
 
 class HistoryQuery(BaseModel):
@@ -64,14 +105,14 @@ class HistoryQuery(BaseModel):
     amount_max: Optional[float] = None
     currency: Optional[str] = None
     source_type: Optional[str] = None
-    page: int = 1
-    page_size: int = 20
     sort_by: str = "created_at"
     sort_dir: str = "desc"
+    page: int = 1
+    page_size: int = 20
 
 
 class HistoryResponse(BaseModel):
-    invoices: List[InvoiceData]
+    invoices: list
     total_count: int
     page: int
     page_size: int
@@ -86,29 +127,6 @@ class DashboardStats(BaseModel):
     avg_confidence: float = 0.0
     qr_bill_count: int = 0
     ocr_count: int = 0
+    hybrid_count: int = 0
     this_month_count: int = 0
-    top_vendors: List[dict] = []
-
-
-class InvoiceUpdate(BaseModel):
-    # Vendor
-    vendor_name: Optional[str] = None
-    vendor_address: Optional[str] = None
-    vendor_iban: Optional[str] = None
-    vendor_vat_uid: Optional[str] = None
-
-    # Recipient
-    recipient_name: Optional[str] = None
-    recipient_address: Optional[str] = None
-    recipient_vat_uid: Optional[str] = None
-    recipient_company_code: Optional[str] = None
-
-    # Invoice details
-    invoice_number: Optional[str] = None
-    invoice_date: Optional[str] = None
-    currency: Optional[str] = None
-    subtotal: Optional[float] = None
-    vat_rate: Optional[float] = None
-    vat_amount: Optional[float] = None
-    total: Optional[float] = None
-    reference_number: Optional[str] = None
+    top_vendors: list = []

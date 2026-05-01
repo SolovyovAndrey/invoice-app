@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import List
+from typing import List, Union
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from backend.models.invoice import InvoiceData
@@ -13,8 +13,12 @@ class ExportService:
         ("invoice_number",      "Invoice Nr."),
         ("invoice_date",        "Invoice Date"),
         ("vendor_name",         "Vendor"),
+        ("vendor_address",      "Vendor Address"),
         ("vendor_iban",         "IBAN"),
         ("vendor_vat_uid",      "VAT UID"),
+        ("debtor_name",         "Recipient"),
+        ("debtor_address",      "Recipient Address"),
+        ("client_number",       "Client Nr."),
         ("currency",            "Currency"),
         ("subtotal",            "Subtotal"),
         ("vat_rate",            "VAT %"),
@@ -25,7 +29,14 @@ class ExportService:
         ("confidence_score",    "Confidence %"),
     ]
 
-    def to_csv(self, invoices: List[InvoiceData]) -> io.StringIO:
+    @staticmethod
+    def _get_value(inv, field_name):
+        """Get field value from either a dict or an object."""
+        if isinstance(inv, dict):
+            return inv.get(field_name)
+        return getattr(inv, field_name, None)
+
+    def to_csv(self, invoices: List) -> io.StringIO:
         output = io.StringIO()
         writer = csv.writer(output, delimiter=config.CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
         headers = [col[1] for col in self.COLUMNS]
@@ -33,7 +44,7 @@ class ExportService:
         for inv in invoices:
             row = []
             for field_name, _ in self.COLUMNS:
-                value = getattr(inv, field_name, "")
+                value = self._get_value(inv, field_name)
                 if value is None:
                     value = ""
                 elif isinstance(value, float):
@@ -43,7 +54,7 @@ class ExportService:
         output.seek(0)
         return output
 
-    def to_excel(self, invoices: List[InvoiceData]) -> io.BytesIO:
+    def to_excel(self, invoices: List) -> io.BytesIO:
         wb = Workbook()
         ws = wb.active
         ws.title = "Invoices"
@@ -62,7 +73,7 @@ class ExportService:
             cell.border = thin_border
         for row_idx, inv in enumerate(invoices, 2):
             for col_idx, (field_name, _) in enumerate(self.COLUMNS, 1):
-                value = getattr(inv, field_name, None)
+                value = self._get_value(inv, field_name)
                 if value is None:
                     value = ""
                 elif isinstance(value, float):

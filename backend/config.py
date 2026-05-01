@@ -1,3 +1,6 @@
+# backend/config.py
+
+import platform
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import List
@@ -21,6 +24,18 @@ class AppConfig:
     )
     MAX_FILE_SIZE_MB: int = 20
     MAX_BATCH_SIZE: int = 50
+
+    # ── Tesseract binary ─────────────────────
+    @property
+    def TESSERACT_CMD(self) -> str:
+        """
+        Path to the Tesseract executable.
+        - Windows: full path to .exe
+        - Linux/macOS: just "tesseract" (expects it in PATH)
+        """
+        if platform.system() == "Windows":
+            return r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+        return "tesseract"
 
     # ── OCR ──────────────────────────────────
     TESSERACT_LANGUAGES: str = "deu+fra+eng"

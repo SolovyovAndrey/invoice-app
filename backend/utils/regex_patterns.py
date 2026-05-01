@@ -91,6 +91,8 @@ INVOICE_NUMBER_KEYWORDS = {
         r"Facture\s*(?:N[°o.]?|No|Num[ée]ro)\s*:?",
         r"N[°o.]\s*(?:de\s+)?facture\s*:?",
         r"Ticket\s+de\s+caisse\s*/?\s*Facture",
+        r"Affaire\s*N\s*[°o.]?\s*:?",
+        r"Affaire\s+N[°o.]", 
         r"Facture",
     ],
     "it": [
