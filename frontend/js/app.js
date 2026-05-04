@@ -341,6 +341,7 @@ async function deleteSingle(id){
 
 // --- Edit Modal ---
 async function openEdit(id){
+    console.log("Opening edit modal 37 for ID:", id);
     try{
         var r=await fetch("/api/history/"+id);if(!r.ok)throw new Error("Not found");
         var inv=await r.json();editingId=id;
@@ -356,18 +357,18 @@ async function openEdit(id){
                 ["vendor_name","Name"],["vendor_address","Address"],
                 ["vendor_vat_uid","VAT UID"],["vendor_iban","IBAN"]
             ]},
-            { title: "Invoice Details", fields: [
+            { title: "Invoice Details", color: "#0d9488", fields: [
                 ["invoice_number","Invoice No."],["invoice_date","Invoice Date"],
                 ["reference_number","QR Reference"]
             ]},
-            { title: "Amounts", fields: [
+            { title: "Amounts", color: "#a78bfa", fields: [
                 ["currency","Currency"],["subtotal","Subtotal"],
                 ["vat_rate","VAT %"],["vat_amount","VAT Amount"],["total","Total"]
             ]}
         ];
 
         sections.forEach(function(sec){
-            body.innerHTML += '<div class="modal-section-header">'+sec.title+'</div>';
+            body.innerHTML += '<div class="modal-section-header" style="background:' + sec.color + '">'+sec.title+'</div>';
             sec.fields.forEach(function(pair){
                 var f=pair[0], l=pair[1], v=inv[f];
                 var d=(v!=null&&typeof v==="number")?String(v):(v||"");

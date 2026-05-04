@@ -1,0 +1,235 @@
+===========================================================
+       SWISS INVOICE SCANNER — SETUP GUIDE
+===========================================================
+
+PREREQUISITES
+-----------------------------------------------------------
+Tool         | Version  | Purpose
+-------------|----------|----------------------------
+Python       | >= 3.9   | Runtime
+Tesseract    | >= 5.0   | OCR engine
+Git          | any      | Clone repository
+pip          | latest   | Package manager
+
+
+===========================================================
+STEP 1 — CLONE THE REPOSITORY
+===========================================================
+
+git clone https://github.com/YOUR_USERNAME/swiss-invoice-scanner.git
+cd swiss-invoice-scanner
+
+
+===========================================================
+STEP 2 — CREATE VIRTUAL ENVIRONMENT
+===========================================================
+
+--- macOS / Linux ---
+python3 -m venv venv
+source venv/bin/activate
+
+--- Windows ---
+python -m venv venv
+venv\Scripts\activate
+
+
+===========================================================
+STEP 3 — INSTALL PYTHON DEPENDENCIES
+===========================================================
+
+pip install --upgrade pip
+pip install -r requirements.txt
+
+--- If requirements.txt is missing, install manually ---
+
+pip install opencv-python
+pip install opencv-contrib-python
+pip install pytesseract
+pip install Pillow
+pip install numpy
+
+NOTE: opencv-contrib-python is REQUIRED for QRCodeDetectorAruco
+
+
+===========================================================
+STEP 4 — INSTALL TESSERACT OCR ENGINE
+===========================================================
+
+--- macOS ---
+brew install tesseract
+
+--- Linux (Ubuntu/Debian) ---
+sudo apt update
+sudo apt install tesseract-ocr
+
+--- Windows ---
+1. Download installer from:
+   https://github.com/UB-Mannheim/tesseract/wiki
+2. Run installer
+   (note install path, e.g. C:\Program Files\Tesseract-OCR)
+3. Add to System PATH or set in config.py
+
+--- Verify installation ---
+tesseract --version
+
+Expected output: tesseract 5.x.x
+
+
+===========================================================
+STEP 5 — INSTALL LANGUAGE PACKS (FR + DE)
+===========================================================
+
+--- macOS ---
+brew install tesseract-lang
+(this installs ALL languages)
+
+--- Linux ---
+sudo apt install tesseract-ocr-fra tesseract-ocr-deu
+
+--- Windows ---
+1. Download language files:
+   - https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata
+   - https://github.com/tesseract-ocr/tessdata/raw/main/deu.traineddata
+2. Copy both files to Tesseract tessdata folder:
+   C:\Program Files\Tesseract-OCR\tessdata\
+
+--- Verify languages ---
+tesseract --list-langs
+
+Expected output should include:
+  fra
+  deu
+  eng
+
+
+===========================================================
+STEP 6 — CONFIGURE THE APP
+===========================================================
+
+Edit config.py to match your system:
+
+----- macOS / Linux (usually auto-detected) -----
+TESSERACT_CMD = "/usr/local/bin/tesseract"
+
+----- Windows (update path if needed) -----
+TESSERACT_CMD = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+----- OCR Languages -----
+TESSERACT_LANGUAGES = "fra+deu+eng"
+
+----- Image preprocessing DPI -----
+OCR_DPI = 300
+
+--- Find your Tesseract path ---
+
+macOS / Linux:
+  which tesseract
+
+Windows (PowerShell):
+  Get-Command tesseract | Select-Object Source
+
+
+===========================================================
+STEP 7 — RUN THE APPLICATION
+===========================================================
+
+python main.py
+
+
+===========================================================
+STEP 8 — TEST WITH SAMPLE INVOICE
+===========================================================
+
+1. Place a test invoice (PDF or image) in the project folder
+2. Open the app
+3. Select the invoice file
+4. Verify extracted data:
+   - QR code data (Swiss QR-bill)
+   - OCR fallback (text extraction)
+   - Recipient, amounts, invoice details
+
+
+===========================================================
+PROJECT STRUCTURE
+===========================================================
+
+swiss-invoice-scanner/
+├── config.py           # Tesseract & OCR settings
+├── main.py             # App entry point
+├── qr_service.py       # QR detection (OpenCV)
+├── ocr_service.py      # OCR extraction (Tesseract)
+├── invoice_data.py     # Unified data model
+├── requirements.txt    # Python dependencies
+└── README.md           # Setup guide
+
+
+===========================================================
+TROUBLESHOOTING
+===========================================================
+
+PROBLEM: TesseractNotFoundError
+FIX: Set correct path in config.py:
+     TESSERACT_CMD = "/your/actual/path/tesseract"
+
+-----------------------------------------------------------
+
+PROBLEM: ModuleNotFoundError: cv2
+FIX: pip install opencv-contrib-python
+
+-----------------------------------------------------------
+
+PROBLEM: QR detection not working
+FIX: Ensure opencv-contrib-python (not just opencv-python):
+     pip uninstall opencv-python
+     pip install opencv-contrib-python
+
+-----------------------------------------------------------
+
+PROBLEM: OCR returns empty or garbage text
+FIX:
+  - Verify language packs: tesseract --list-langs
+  - Ensure OCR_DPI = 300 in config.py
+  - Check image quality (min 150 DPI recommended)
+
+-----------------------------------------------------------
+
+PROBLEM: Permission denied (macOS)
+FIX: chmod +x /usr/local/bin/tesseract
+
+
+===========================================================
+HOW IT WORKS
+===========================================================
+
+Invoice Image/PDF
+       |
+       v
+  QrService (OpenCV)
+       |
+       |--- QR found? --- YES ---> InvoiceData (output)
+       |
+       |--- NO
+       |
+       v
+  OcrService (Tesseract)
+       |
+       v
+  InvoiceData (output)
+
+
+===========================================================
+REQUIREMENTS.TXT CONTENTS
+===========================================================
+
+opencv-contrib-python>=4.8.0
+pytesseract>=0.3.10
+Pillow>=10.0.0
+numpy>=1.24.0
+
+To generate from your environment:
+  pip freeze > requirements.txt
+
+
+===========================================================
+LICENSE: MIT
+===========================================================
