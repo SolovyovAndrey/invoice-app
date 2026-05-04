@@ -341,6 +341,7 @@ async function deleteSingle(id){
 
 // --- Edit Modal ---
 async function openEdit(id){
+    console.log("Opening edit modal 37 for ID:", id);
     try{
         var r=await fetch("/api/history/"+id);if(!r.ok)throw new Error("Not found");
         var inv=await r.json();editingId=id;
@@ -367,7 +368,7 @@ async function openEdit(id){
         ];
 
         sections.forEach(function(sec){
-            body.innerHTML += '<div class="modal-section-header">'+sec.title+'</div>';
+            body.innerHTML += '<div class="modal-section-header" style="background:' + sec.color + '">'+sec.title+'</div>';
             sec.fields.forEach(function(pair){
                 var f=pair[0], l=pair[1], v=inv[f];
                 var d=(v!=null&&typeof v==="number")?String(v):(v||"");
