@@ -357,11 +357,11 @@ async function openEdit(id){
                 ["vendor_name","Name"],["vendor_address","Address"],
                 ["vendor_vat_uid","VAT UID"],["vendor_iban","IBAN"]
             ]},
-            { title: "Invoice Details", fields: [
+            { title: "Invoice Details", color: "#0d9488", fields: [
                 ["invoice_number","Invoice No."],["invoice_date","Invoice Date"],
                 ["reference_number","QR Reference"]
             ]},
-            { title: "Amounts", fields: [
+            { title: "Amounts", color: "#a78bfa", fields: [
                 ["currency","Currency"],["subtotal","Subtotal"],
                 ["vat_rate","VAT %"],["vat_amount","VAT Amount"],["total","Total"]
             ]}
